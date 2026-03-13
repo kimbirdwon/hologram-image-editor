@@ -1,9 +1,9 @@
-// HTML 요소
 const upload = document.getElementById("upload");
 const preview = document.getElementById("preview");
 const download = document.getElementById("download");
+const widthInput = document.getElementById("width_cm");
 
-// Canvas 고정 크기
+// 캔버스 고정: 팬 18cm 기준 (웹용 픽셀은 임의, 예: 500px)
 const canvasSize = 500;
 const canvas = document.createElement("canvas");
 canvas.width = canvasSize;
@@ -14,7 +14,9 @@ const ctx = canvas.getContext("2d");
 ctx.fillStyle = "black";
 ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-// 이미지 업로드 이벤트
+let originalImage = null;
+
+// 이미지 업로드
 upload.addEventListener("change", function() {
     const file = upload.files[0];
     if (!file) return;
@@ -22,40 +24,38 @@ upload.addEventListener("change", function() {
     const img = new Image();
     img.src = URL.createObjectURL(file);
     img.onload = function() {
-        // 이미지 최대 크기 (Canvas 80% 범위)
-        const maxWidth = canvasSize * 0.8;
-        const maxHeight = canvasSize * 0.8;
-
-        let width = img.width;
-        let height = img.height;
-        const aspect = width / height;
-
-        // 비율 유지하며 크기 조정
-        if (width > maxWidth) {
-            width = maxWidth;
-            height = width / aspect;
-        }
-        if (height > maxHeight) {
-            height = maxHeight;
-            width = height * aspect;
-        }
-
-        // 이미지 중앙 좌표 계산
-        const offsetX = (canvasSize - width) / 2;
-        const offsetY = (canvasSize - height) / 2;
-
-        // Canvas 초기화 + 검정 배경
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvasSize, canvasSize);
-
-        // 이미지 그리기
-        ctx.drawImage(img, offsetX, offsetY, width, height);
-
-        // 미리보기
-        preview.src = canvas.toDataURL("image/png");
-
-        // 다운로드 링크
-        download.href = canvas.toDataURL("image/png");
-        download.download = "resized.png";
+        originalImage = img;
+        drawCanvas(parseFloat(widthInput.value) || 5);
     };
 });
+
+// 가로(cm) 입력 변경 시
+widthInput.addEventListener("input", function() {
+    if (originalImage) {
+        drawCanvas(parseFloat(widthInput.value));
+    }
+});
+
+// Canvas 그리기 함수
+function drawCanvas(userCm) {
+    if (!userCm || userCm <= 0 || userCm > 18) return;
+
+    // 팬 전체 18cm → Canvas 500px
+    const ratio = userCm / 18; 
+    const imgWidth = Math.round(canvasSize * ratio);
+    const imgHeight = Math.round(imgWidth * (originalImage.height / originalImage.width));
+
+    // 초기화 + 검정 배경
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+    // 이미지 중앙 배치
+    const offsetX = Math.round((canvasSize - imgWidth) / 2);
+    const offsetY = Math.round((canvasSize - imgHeight) / 2);
+    ctx.drawImage(originalImage, offsetX, offsetY, imgWidth, imgHeight);
+
+    // 미리보기 & 다운로드
+    preview.src = canvas.toDataURL("image/png");
+    download.href = canvas.toDataURL("image/png");
+    download.download = "resized.png";
+}
