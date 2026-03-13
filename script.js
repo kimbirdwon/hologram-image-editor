@@ -1,72 +1,61 @@
-const upload = document.getElementById("upload")
-const resizeBtn = document.getElementById("resizeBtn")
-const preview = document.getElementById("preview")
-const download = document.getElementById("download")
-const widthInput = document.getElementById("width_cm")
+// HTML 요소
+const upload = document.getElementById("upload");
+const preview = document.getElementById("preview");
+const download = document.getElementById("download");
 
-let originalImage = null
-let originalWidth = 0
-let originalHeight = 0
-let aspectRatio = 1
-const panelCm = 18
+// Canvas 고정 크기
+const canvasSize = 500;
+const canvas = document.createElement("canvas");
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+const ctx = canvas.getContext("2d");
 
+// 초기 검정 배경
+ctx.fillStyle = "black";
+ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+// 이미지 업로드 이벤트
 upload.addEventListener("change", function() {
-    const file = upload.files[0]
-    if (!file) return
+    const file = upload.files[0];
+    if (!file) return;
 
-    const img = new Image()
-    img.src = URL.createObjectURL(file)
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
     img.onload = function() {
-        originalImage = img
-        originalWidth = img.width
-        originalHeight = img.height
-        aspectRatio = originalWidth / originalHeight
-        widthInput.value = 5
-        drawCanvas(5)
-    }
-})
+        // 이미지 최대 크기 (Canvas 80% 범위)
+        const maxWidth = canvasSize * 0.8;
+        const maxHeight = canvasSize * 0.8;
 
-resizeBtn.addEventListener("click", function() {
-    if (!originalImage) {
-        alert("이미지를 먼저 선택해주세요")
-        return
-    }
+        let width = img.width;
+        let height = img.height;
+        const aspect = width / height;
 
-    const userCm = parseFloat(widthInput.value)
-    if (isNaN(userCm) || userCm <= 0 || userCm > panelCm) {
-        alert(`1~${panelCm}cm 사이로 입력해주세요`)
-        return
-    }
+        // 비율 유지하며 크기 조정
+        if (width > maxWidth) {
+            width = maxWidth;
+            height = width / aspect;
+        }
+        if (height > maxHeight) {
+            height = maxHeight;
+            width = height * aspect;
+        }
 
-    drawCanvas(userCm)
-})
+        // 이미지 중앙 좌표 계산
+        const offsetX = (canvasSize - width) / 2;
+        const offsetY = (canvasSize - height) / 2;
 
-function drawCanvas(userCm) {
-    const ratio = userCm / panelCm
-    const imgWidth = Math.round(originalWidth * ratio)
-    const imgHeight = Math.round(imgWidth / aspectRatio)
+        // Canvas 초기화 + 검정 배경
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-    // 정사각형 Canvas: 이미지 최대 크기 기준 + 여백
-    const padding = 20
-    const canvasSize = Math.max(imgWidth, imgHeight) + padding * 2
+        // 이미지 그리기
+        ctx.drawImage(img, offsetX, offsetY, width, height);
 
-    const canvas = document.createElement("canvas")
-    canvas.width = canvasSize
-    canvas.height = canvasSize
+        // 미리보기
+        preview.src = canvas.toDataURL("image/png");
 
-    const ctx = canvas.getContext("2d")
-
-    // 1️⃣ 배경 검정색
-    ctx.fillStyle = "black"
-    ctx.fillRect(0, 0, canvasSize, canvasSize)
-
-    // 2️⃣ 이미지 중앙에 배치
-    const offsetX = Math.round((canvasSize - imgWidth) / 2)
-    const offsetY = Math.round((canvasSize - imgHeight) / 2)
-    ctx.drawImage(originalImage, offsetX, offsetY, imgWidth, imgHeight)
-
-    // 3️⃣ 미리보기 & 다운로드
-    preview.src = canvas.toDataURL("image/png")
-    download.href = canvas.toDataURL("image/png")
-    download.download = "resized.png"
-}
+        // 다운로드 링크
+        download.href = canvas.toDataURL("image/png");
+        download.download = "resized.png";
+    };
+});
