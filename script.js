@@ -3,7 +3,8 @@ const preview = document.getElementById("preview");
 const download = document.getElementById("download");
 const widthInput = document.getElementById("width_cm");
 
-// 캔버스 고정: 팬 18cm 기준 (웹용 픽셀은 임의, 예: 500px)
+// 팬 전체 18cm 기준 → Canvas 고정 (웹용 픽셀, 예: 500px)
+const panelCm = 18;
 const canvasSize = 500;
 const canvas = document.createElement("canvas");
 canvas.width = canvasSize;
@@ -38,14 +39,14 @@ widthInput.addEventListener("input", function() {
 
 // Canvas 그리기 함수
 function drawCanvas(userCm) {
-    if (!userCm || userCm <= 0 || userCm > 18) return;
+    if (!userCm || userCm <= 0 || userCm > panelCm) return;
 
-    // 팬 전체 18cm → Canvas 500px
-    const ratio = userCm / 18; 
+    // 이미지 가로 비율 계산
+    const ratio = userCm / panelCm; 
     const imgWidth = Math.round(canvasSize * ratio);
     const imgHeight = Math.round(imgWidth * (originalImage.height / originalImage.width));
 
-    // 초기화 + 검정 배경
+    // 캔버스 초기화 + 검정 배경
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 
@@ -54,8 +55,10 @@ function drawCanvas(userCm) {
     const offsetY = Math.round((canvasSize - imgHeight) / 2);
     ctx.drawImage(originalImage, offsetX, offsetY, imgWidth, imgHeight);
 
-    // 미리보기 & 다운로드
+    // 미리보기 (PNG)
     preview.src = canvas.toDataURL("image/png");
-    download.href = canvas.toDataURL("image/png");
-    download.download = "resized.png";
+
+    // 다운로드 (JPG)
+    download.href = canvas.toDataURL("image/jpeg", 0.95); // 95% 품질
+    download.download = "resized.jpg";
 }
