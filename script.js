@@ -2,10 +2,12 @@ const upload = document.getElementById("upload")
 const resizeBtn = document.getElementById("resizeBtn")
 const preview = document.getElementById("preview")
 const download = document.getElementById("download")
-const widthInput = document.getElementById("width")
-const heightInput = document.getElementById("height")
+const widthInput = document.getElementById("width_cm")
 
 let originalWidth, originalHeight, aspectRatio
+
+// 팬 실제 가로(cm)
+const panelCm = 18
 
 upload.addEventListener("change", function() {
     const file = upload.files[0]
@@ -18,59 +20,61 @@ upload.addEventListener("change", function() {
         originalHeight = img.height
         aspectRatio = originalWidth / originalHeight
 
-        // 기본값을 원본 비율로 설정
-        widthInput.value = originalWidth
-        heightInput.value = originalHeight
-        preview.src = img.src
-        download.href = img.src
-        download.innerText = "이미지 다운로드"
+        // 초기값
+        widthInput.value = 5  // 기본 5cm
+        const newWidthPx = Math.round(originalWidth * (widthInput.value / panelCm))
+        const newHeightPx = Math.round(newWidthPx / aspectRatio)
+
+        const canvas = document.createElement("canvas")
+        canvas.width = newWidthPx
+        canvas.height = newHeightPx
+        const ctx = canvas.getContext("2d")
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = "high"
+        ctx.drawImage(img, 0, 0, newWidthPx, newHeightPx)
+
+        const resizedImage = canvas.toDataURL("image/png")
+        preview.src = resizedImage
+        download.href = resizedImage
+        download.download = "resized.png"
     }
 })
 
-// width 입력 시 height 자동 계산
-widthInput.addEventListener("input", function() {
-    if(aspectRatio) {
-        const newWidth = parseInt(widthInput.value)
-        heightInput.value = Math.round(newWidth / aspectRatio)
-    }
-})
-
-// height 입력 시 width 자동 계산
-heightInput.addEventListener("input", function() {
-    if(aspectRatio) {
-        const newHeight = parseInt(heightInput.value)
-        widthInput.value = Math.round(newHeight * aspectRatio)
-    }
-})
-
-resizeBtn.addEventListener("click", resizeImage)
-
-function resizeImage(){
+resizeBtn.addEventListener("click", function() {
     const file = upload.files[0]
     if(!file){
         alert("이미지를 선택하세요")
         return
     }
 
-    const width = parseInt(widthInput.value)
-    const height = parseInt(heightInput.value)
+    const userCm = parseFloat(widthInput.value)
+    if(isNaN(userCm) || userCm <= 0 || userCm > panelCm){
+        alert(`1~${panelCm}cm 사이로 입력해주세요`)
+        return
+    }
 
     const reader = new FileReader()
     reader.onload = function(event){
         const img = new Image()
         img.onload = function(){
+            const ratio = userCm / panelCm
+            const newWidthPx = Math.round(originalWidth * ratio)
+            const newHeightPx = Math.round(newWidthPx / aspectRatio)
+
             const canvas = document.createElement("canvas")
+            canvas.width = newWidthPx
+            canvas.height = newHeightPx
             const ctx = canvas.getContext("2d")
-            canvas.width = width
-            canvas.height = height
-            ctx.drawImage(img, 0, 0, width, height)
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = "high"
+            ctx.drawImage(img, 0, 0, newWidthPx, newHeightPx)
+
             const resizedImage = canvas.toDataURL("image/png")
             preview.src = resizedImage
             download.href = resizedImage
             download.download = "resized.png"
-            download.innerText = "이미지 다운로드"
         }
         img.src = event.target.result
     }
     reader.readAsDataURL(file)
-}
+})
