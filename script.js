@@ -47,7 +47,7 @@ resizeBtn.addEventListener("click", function() {
     drawCanvas(userCm)
 })
 
-// Canvas 그리는 함수
+// Canvas 그리는 함수 (검정 배경 포함)
 function drawCanvas(userCm) {
     const ratio = userCm / panelCm
     const newWidthPx = Math.round(originalWidth * ratio)
@@ -63,18 +63,18 @@ function drawCanvas(userCm) {
 
     const ctx = canvas.getContext("2d")
 
-    // 1️⃣ 배경 검정색
+    // ✅ 배경 검정색 (Canvas 생성 직후)
     ctx.fillStyle = "black"
     ctx.fillRect(0, 0, size, size)
 
-    // 2️⃣ 이미지 중앙 배치
+    // 이미지 중앙 배치
     const offsetX = Math.round((size - newWidthPx) / 2)
     const offsetY = Math.round((size - newHeightPx) / 2)
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = "high"
     ctx.drawImage(originalImage, offsetX, offsetY, newWidthPx, newHeightPx)
 
-    // 3️⃣ 미리보기 & 다운로드
+    // 미리보기 & 다운로드
     const resizedImage = canvas.toDataURL("image/png")
     preview.src = resizedImage
     download.href = resizedImage
