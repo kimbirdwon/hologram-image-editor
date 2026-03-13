@@ -1,1 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Image Resizer</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
+<body>
+
+<h1>이미지 사이즈 변환</h1>
+
+<div class="container">
+
+<input type="file" id="upload" accept="image/*">
+
+<div class="size-input">
+<input type="number" id="width" placeholder="width">
+<input type="number" id="height" placeholder="height">
+</div>
+
+<button id="resizeBtn">변환하기</button>
+
+<h3>미리보기</h3>
+
+<img id="preview">
+
+<br>
+
+<a id="download">다운로드</a>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
