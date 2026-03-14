@@ -1,1 +1,1 @@
-# fan-image-resizer
+# Hologram Image Editor
