@@ -19,12 +19,14 @@ upload.addEventListener("change", () => {
     const file = upload.files[0];
     if (!file) return;
 
+    document.querySelector(".file-btn").textContent = file.name;
+
     const img = new Image();
     img.src = URL.createObjectURL(file);
     img.onload = () => {
         originalImage = img;
         croppedImage = cropTransparentEdges(originalImage);
-        drawPreview(croppedImage); // 미리보기: 햄버거만 중앙
+        drawPreview(croppedImage);
     };
 });
 
@@ -120,7 +122,7 @@ function drawResized(cropCanvas, userCm, userText) {
     const offsetX = Math.round((canvasSize - drawWidth) / 2);
     const offsetY = Math.round((canvasSize - groupHeight) / 2);
     // 폰트 적용
-    ctx.font = `${fontSize}px Nanum`;
+    ctx.font = `${fontSize}px Heavy`;
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
