@@ -37,7 +37,7 @@ button {
 
 @font-face {
     font-family: 'Nanum';   /* JS에서 사용할 이름 */
-    src: url('./font/NanumSquareNeo-eHv.ttf') format('truetype'); /* ttf 파일 */
+    src: url('./fonts/NanumSquareNeo-eHv.ttf') format('truetype'); /* ttf 파일 */
     font-weight: normal;
     font-style: normal;
 }
