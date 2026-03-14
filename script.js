@@ -57,4 +57,4 @@ function drawCanvas(userCm) {
     // 다운로드 (PNG)
     download.href = canvas.toDataURL("image/png");
     download.download = "resized.png";
-});
+};
